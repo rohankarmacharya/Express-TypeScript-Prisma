@@ -9,8 +9,8 @@ router.post("/", async (req, res) => {
   const { name, age, email, password } = req.body;
 
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);   //10 - salt around: number of iterations bcrypt uses when generating password
 
-    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { name, age, email, password: hashedPassword },
     });
