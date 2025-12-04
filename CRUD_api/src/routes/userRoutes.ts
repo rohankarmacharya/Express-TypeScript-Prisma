@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../prisma.js";
+import bcrypt from 'bcrypt';
 
 const router = Router();
 
@@ -8,8 +9,10 @@ router.post("/", async (req, res) => {
   const { name, age, email, password } = req.body;
 
   try {
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, age, email, password },
+      data: { name, age, email, password: hashedPassword },
     });
     res.json({ message: "User Created!", user });
   } catch (error: any) {
@@ -48,9 +51,15 @@ router.put("/:id", async (req, res) => {
   const { name, age, email, password } = req.body;
 
   try {
+
+    let hashedPassword = undefined;
+
+    if(password){
+        hashedPassword = await bcrypt.hash(password, 10);
+    }
     const user = await prisma.user.update({
       where: { id },
-      data: { name, age, email, password },
+      data: { name, age, email, password: hashedPassword},
     });
     res.json({ message: "User updated!", user });
   } catch (error: any) {
